@@ -1,0 +1,228 @@
+{
+    "version":"0.1",
+    "pageContent":{
+      "_comments":"JSON object that contains data for page labels, buttons, etc.",
+      "navItems":{
+        "_common":{
+          "buttonBackToGallery":{
+            "name":"Back To Gallery",
+            "method":"backToGallery()",
+            "idName":"backToGallery"
+          },
+          "buttonStartTutorial":{
+            "name":"Start Tutorial",
+            "method":"startTutorialFromDetailsScreen()",
+            "idName":"startTutorial"
+          },
+          "buttonViewDetails":{
+            "name":"View Details",
+            "method":"viewDetails()",
+            "idName":"stepsViewDetails"
+          }
+        }
+      }
+    },
+	"tutorial":{
+      "_common":{
+        "name":"Commands - Migrate from earlier product versions using the mqsiextractcomponents command",
+        "shortDescription":"Learn how to use the mqsiextractcomponents command to create integration nodes and servers based on existing IBM Integration Bus 10 and IBM App Connect Enterprise 11 topologies.",
+        "durationText":"This tutorial takes approximately",
+        "durationTime":"15 minutes",
+        "_resourceToOpenComment":"The ID of the first resource to open when the user imports the tutorial. Resource IDs are defined in the repo_metadata.json Tutorials listing on ot4i.",
+        "resourceToOpen":"MyDemoFlow",
+        "helpLink":{
+          "text":"IBM Knowledge Center",
+          "link":"https://www.ibm.com/support/knowledgecenter/en/SSTTDS_11.0.0/com.ibm.ace.home.doc/help_home.htm"
+        }
+      },
+      "pageDetails":{
+        "topicsName":"Tutorial Topics",
+        "_topicListComment":"A short list of product concepts or tasks demonstrated by this tutorial",
+        "topicList":[
+          {
+            "title":"The mqsiextractcomponents command"
+          }
+        ],
+        "outcomesName":"Learning outcomes",
+        "_outcomesComment":"Start learning some product basics with a very simple Toolkit use case",
+        "outcomeList":[
+          {
+            "title":"Use the mqsiextractcomponents command to create integration nodes and servers based on backups from earlier product versions"
+          }
+        ],
+        "summary":{
+          "overviewName":"OVERVIEW",
+          "_overviewComment":"A short description of what happens in this tutorial, and an optional short explanation of the IIB concepts used in this tutorial if necessary for context. What background knowledge must the user have for this to make sense?",
+          "sections":[
+            {
+              "section":"This tutorial demonstrates how to use the mqsiextractcomponents command to migrate your existing IBM Integration Bus 10 or IBM App Connect Enterprise 11 integration servers and integration nodes to IBM App Connect Enterprise 12. The command is used to extract configuration and resources on the same computer or a different computer. You can choose to extract components from an integration node or from an integration server. Extracting the configuration and resources from an integration node also extracts the configuration and resources of all the integration servers that are associated with the integration node. In either case, you will run the mqsibackupbroker command on the source system and then transfer the backup file that is created to the computer to which you are extracting the configuration and resources. To make this tutorial as convenient as possible to try out, example backup files are provided from both IBM Integration Bus 10 and IBM App Connect Enterprise 11."
+			},
+			{
+				"section":"An integration server is used to provide an isolated runtime environment for a set of deployed message flows and resources. Each integration server runs as a unique process in a separate address space. You can configure integration servers to be associated with an integration node that looks after them, or to run independently of an integration node. If you are planning to run App Connect Enterprise directly on a physical machine or virtual machine image, then you are advised to define integration servers under an integration node to manage the associated integration servers. If you are planning to run the App Connect Enterprise in conjunction with a container framework such as Kubernetes, then it is the responsibility of this framework to ensure that the servers remain running (or are restarted appropriately) so in this situation using independent integration servers would be the better choice."
+			}				
+          ]
+        }
+      },
+      "pageSteps":{
+        "create":{
+          "overview":{
+            "name":"Create",
+            "heading":"Import project",
+            "_createComment":"A description of what will happen when the user clicks Import.",
+            "sections":[
+              {				                  
+                "section":"Click <span class='uicontrol'>Import</span> and a single project named <b>MigrationTutorialHelperFiles</b> will be imported into your workspace. Most of this tutorial will use a command console session, but this project holds some files we will use. The project contains a folder name <b>Backups</b> which has an example backup zip file from IBM Integration Bus 10 and another example backup zip file from IBM App Connect Enterprise 11. The <b>BARfiles</b> folder provides two example BAR files, in case you wish to use them."
+              }
+            ]
+          },
+          "helpLinks":{
+            "title":"Find out more",
+            "details":[
+              {
+                "title":"Knowledge Center link to ",
+                "description":"Developing integration solutions from scratch",
+                "link":"https://www.ibm.com/support/knowledgecenter/en/SSTTDS_11.0.0/com.ibm.etools.mft.doc/bi12002_.htm",
+                "type":"web"
+              }
+            ]
+          },
+          "actions":{
+            "title":"Create Actions",
+            "details":[
+              {
+                "name":"Import",
+                "method":"importArtifacts()"
+              }
+            ]
+          }
+        },
+        "prepare":{
+          "overview":{
+            "name":"Prepare",
+            "heading":"Create example environments in earlier product versions",
+            "_prepareComment":"Creating an IntegrationServer:",
+            "sections":[
+              {
+                "section":"",
+                "steps":{
+                  "type":"ordered",
+                  "details":[
+                    {
+                      "details":"This tutorial provides back-up zip files from example integration nodes which were created using IBM Integration Bus 10 and App Connect Enterprise 11. Most users of this tutorial can skip right over this section and use the provided backup files, but if you would prefer not to use the provided backups and would like to recreate an integration node which has the same settings yourself, then you can use the provided commands below:<br><br><b>For IBM Integration Bus 10:</b><br><br><code>mqsicreatebroker MY_NODE_V10<br>mqsistart MY_NODE_V10<br>mqsicreateexecutiongroup MY_NODE_V10 -e server1<br>mqsicreateexecutiongroup MY_NODE_V10 -e server2<br>mqsicreateexecutiongroup MY_NODE_V10 -e server3<br>mqsicreateconfigurableservice MY_NODE_V10 -c FtpServer -o MyFTPServer -n protocol,serverName,scanDelay,remoteDirectory,securityIdentity -v  SFTP,winlnx58,30,.,user1<br>mqsisetdbparms MY_NODE_V10 -n sftp::user1 -u ben -p pass123<br>mqsiwebuseradmin MY_NODE_V10 -c -u mywebuser1 -a mypassword1 -r iibadmin<br>mqsiwebuseradmin MY_NODE_V10 -c -u mywebuser2 -a mypassword2 -r iibuser<br>mqsichangefileauth MY_NODE_V10 -r iibadmin -e server1 -p all+<br>mqsichangefileauth MY_NODE_V10 -r iibuser -e server1 -p read+,execute+<br>mqsistop MY_NODE_V10<br>mqsistart MY_NODE_V10<br>mqsideploy MY_NODE_V10 -e server1 -a Transformation_ESQL.bar<br>mqsideploy MY_NODE_V10 -e server2 -a TemperatureConverter.bar</code><br><br><b>To create the backup:</b><br><br><code>mqsistop MY_NODE_V10<br>mqsibackupbroker MY_NODE_V10 -d C:\\temp -a Backup_MY_NODE_V10.zip</code><br><br><b>For App Connect Enterprise 11:</b><br><br><code>mqsicreatebroker MY_NODE_V11<br>mqsistart MY_NODE_V11<br>mqsicreateexecutiongroup MY_NODE_V11 -e serverA<br>mqsicreateexecutiongroup MY_NODE_V11 -e serverB<br>mqsicreateconfigurableservice MY_NODE_V11 -c FtpServer -o MyFTPServer -n protocol,serverName,scanDelay,remoteDirectory,securityIdentity -v  SFTP,winlnx58,30,.,user1<br>mqsisetdbparms MY_NODE_V11 -n sftp::user1 -u ben -p pass123<br>mqsiwebuseradmin MY_NODE_V11 -c -u mywebuser1 -a mypassword1 -r iibadmin<br>mqsiwebuseradmin MY_NODE_V11 -c -u mywebuser2 -a mypassword2 -r iibuser<br>mqsichangefileauth MY_NODE_V11 -r iibadmin -e serverA -p all+<br>mqsichangefileauth MY_NODE_V11 -r iibuser -e serverA -p read+,execute+<br>mqsistop MY_NODE_V11<br>mqsistart MY_NODE_V11<br>mqsideploy MY_NODE_V11 -e serverA -a Transformation_ESQL.bar<br>mqsideploy MY_NODE_V11 -e serverB -a TemperatureConverter.bar</code><br><br><b>To create the backup:</b><br><br><code>mqsistop MY_NODE_V11<br>mqsibackupbroker MY_NODE_V11 -d C:\\temp -a Backup_MY_NODE_V11.zip</code><br><br>"
+					},
+                    {
+                      "details":"Now move to the <b>Run</b> section of the tutorial where we will extract configuration information from the backups which we just created."
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "run":{
+          "overview":{
+            "name":"Run",
+            "heading":"Test the message flow using the local Integration Server",
+            "_runComment":"The full steps for the user to run through the tutorial. Use 'sections' to render paragraphs, 'steps' with a type of 'ordered' or 'unordered' to render HTML lists, and 'substeps' to render nested lists.",
+            "sections":[
+              {
+                "section":"Extract a whole IBM Integration Bus 10 integration node into an App Connect Enterprise 12 integration node",
+                "steps":{
+                  "type":"ordered",
+                  "details":[
+                    {
+                      "details":"Launch an IBM App Connect Enterprise 12 command console session and run the following commands"
+					},
+					{
+					  "details":"<code>mqsiextractcomponents --backup-file C:\\MyToolkitWorkspace\\MigrationTutorialHelperFiles\\Backups\\Backup_MY_NODE_V10.zip --source-integration-node MY_NODE_V10 --target-integration-node MY_V10NEWNODENAME<br><br>The command response should look like this:<br><br><code>BIP8469I: Version '10.0' backup file supplied.<br>BIP8471I: Loading configuration for source integration node 'MY_NODE_V10'.<br>BIP8389W: Property 'sslProtocol' for the node wide httplistener 'HTTPSConnector' is no longer available. The property was configured with value 'TLS', which was not the default.<br>BIP8470I: Loading configuration for integration server 'server1'.<br>BIP8470I: Loading configuration for integration server 'server2'.<br>BIP8473I: Creating target integration node 'MY_V10NEWNODENAME'.<br>BIP8691W: Migrating local web users accounts and configuring 'webUserPasswordHashAlgorithm' with value 'SHA-1' for compatibility.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+						"details":"<code>mqsilist</code><br><br>The command response should look like this:<br><br><code>BIP1326I: Integration node 'MY_V10NEWNODENAME' is stopped.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+						"details":"<code>mqsistart MY_V10NEWNODENAME</code><br><br>The command response should look like this:<br><br><code>BIP8096I: Successful command initiation, check the system log to ensure that the component started without problem and that it continues to run without problem.</code>"
+					},
+					{
+						"details":"<code>mqsilist MY_V10NEWNODENAME -e server1</code><br><br>The command response should look like this:<br><br><code>BIP1275I: Application 'Transformation_ESQL' on integration server 'server1' is running.<br>BIP1390I: Policy project 'DefaultPolicies' is deployed to integration server 'server1'.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+						"details":"<code>mqsilist MY_V10NEWNODENAME -e server2</code><br><br>The command response should look like this:<br><br><code>BIP1390I: Policy project 'DefaultPolicies' is deployed to integration server 'server2'.<br>BIP1875I: Service 'TemperatureConverter' on integration server 'server2' is running.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+						"details":"<code>mqsireportdbparms MY_V10NEWNODENAME -n sftp::user1 -u ben -p pass123</code><br><br>The command response should look like this:<br><br><code>BIP8180I: The resource name 'sftp::user1' has userID 'ben'.<br>BIP8201I: The password you entered, 'pass123' for resource 'sftp::user1' and userId 'ben' is correct.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+						"details":"Open a web browser and go to the URL <b>http://localhost:4427</b> and you will see that the same administration port is being used by the migrated node. Navigate into the tiles representing server1 and server2 and you will find that the integrations which were deployed to IBM Integration Bus 10 have been retained. Note that the FTP configurable service has been converted into a policy and placed into a policy project name <b>DefaultPolicies</b>."
+					}
+				  ]
+				}
+			  },		  
+			  {
+                "section":"Extract one integration server from an IIBv10 integration node into an ACEv12 independent integration server",
+                "steps":{
+                  "type":"ordered",
+                  "details":[
+                    {
+                      "details":"We will now repeat the use of the mqsiextractcomponents command, but this time we will direct the command to extract only one integration server, and to create the working directory for an independent integration server. This is one approach you could take if you are considering moving from a traditional node-based architecture topology into a container model with an independent integration server."
+					},
+					{
+						"details":"<code>mqsiextractcomponents --backup-file C:\\MyToolkitWorkspace\\MigrationTutorialHelperFiles\\Backups\\Backup_MY_NODE_V10.zip --source-integration-node MY_NODE_V10 --source-integration-server server1 --target-work-directory C:\\temp\\extracted_server1</code><br><br>The command response should look like this:<br><br><code>BIP8469I: Version '10.0' backup file supplied.<br>BIP8471I: Loading configuration for source integration node 'MY_NODE_V10'.<br>BIP8470I: Loading configuration for integration server 'server1'.<br>BIP8472I: Creating target work directory 'C:\\temp\\extracted_server1'.<br>BIP8071I: Successful command completion.</code><br><br><code>dir C:\\temp\\extracted_server1\\run</code><br><br>The command response should look like this:<br><br><code>&nbsp;Volume in drive C is Windows<br>&nbsp;Volume Serial Number is 0483-269F<br><br>&nbsp;Directory of C:\\temp\\extracted_server1\\run<br><br>24/05/2021&nbsp;&nbsp;21:58&nbsp;&nbsp;&nbsp;&nbsp;<DIR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>24/05/2021&nbsp;&nbsp;21:58&nbsp;&nbsp;&nbsp;&nbsp;<DIR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..<br>24/05/2021&nbsp;&nbsp;21:58&nbsp;&nbsp;&nbsp;&nbsp;<DIR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DefaultPolicies<br>24/05/2021&nbsp;&nbsp;21:58&nbsp;&nbsp;&nbsp;&nbsp;<DIR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Transformation_ESQL<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 File(s)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 bytes<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4 Dir(s)&nbsp;16,931,385,344 bytes free</code>"
+					}
+				  ]
+				}
+		  	},				  
+	      	{
+                "section":"Extract a whole IBM App Connect Enterprise 11 integration node into an App Connect Enterprise 12 integration node",
+                "steps":{
+                  "type":"ordered",
+                  "details":[
+                    {
+                      "details":"<code>mqsiextractcomponents --backup-file C:\\MyToolkitWorkspace\\MigrationTutorialHelperFiles\\Backups\\Backup_MY_NODE_V11.zip --source-integration-node MY_NODE_V11 --target-integration-node MY_V11NEWNODENAME</code><br><br>The command response should look like this:<br><br><code>BIP8469I: Version '11.0' backup file supplied.<br>BIP8471I: Loading configuration for source integration node 'MY_NODE_V11'.<br>BIP8470I: Loading configuration for integration server 'serverA'.<br>BIP8470I: Loading configuration for integration server 'serverB'.<br>BIP8473I: Creating target integration node 'MY_V11NEWNODENAME'.<br>BIP8691W: Migrating local web users accounts and configuring 'webUserPasswordHashAlgorithm' with value 'SHA-1' for compatibility.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+					"details":"<code>mqsilist</code><br><br>The command response should look like this:<br><br><code>BIP1326I: Integration node 'MY_V11NEWNODENAME' is stopped.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+					"details":"<code>mqsistart MY_V11NEWNODENAME</code><br><br>The command response should look like this:<br><br><code>BIP8096I: Successful command initiation, check the system log to ensure that the component started without problem and that it continues to run without problem.</code>"
+					},
+					{
+					"details":"<code>mqsilist MY_V11NEWNODENAME -e serverA</code><br><br>The command response should look like this:<br><br><code>BIP1275I: Application 'Transformation_ESQL' on integration server 'serverA' is running.<br>BIP1390I: Policy project 'DefaultPolicies' is deployed to integration server 'serverA'.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+					"details":"<code>mqsilist MY_V11NEWNODENAME -e serverB</code><br><br>The command response should look like this:<br><br><code>BIP1390I: Policy project 'DefaultPolicies' is deployed to integration server 'serverB'.<br>BIP1875I: Service 'TemperatureConverter' on integration server 'serverB' is running.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+					"details":"<code>mqsireportdbparms MY_V10NEWNODENAME -n sftp::user1 -u ben -p pass123</code><br><br>The command response should look like this:<br><br><code>BIP8180I: The resource name 'sftp::user1' has userID 'ben'.<br>BIP8201I: The password you entered, 'pass123' for resource 'sftp::user1' and userId 'ben' is correct.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+					"details":"Open a web browser and go to the URL <b>http://localhost:4442</b> and you will see that the same administration port is being used by the migrated node. Navigate into the tiles representing serverA and serverB and you will find that the integrations which were deployed to IBM App Connect Enterprise 11 have been retained."
+					}
+				  ]
+				}
+			  },		  
+			  {
+                "section":"Extract one integration server from an ACEv11 integration node into an ACEV12 independent integration server",
+                "steps":{
+                  "type":"ordered",
+                  "details":[
+                    {
+                      "details":"We will now repeat the use of the mqsiextractcomponents command, but this time we will direct the command to extract only one integration server, and to create the working directory for an independent integration server. This is one approach you could take if you are considering moving from a traditional node-based architecture topology into a container model with an independent integration server."
+					},
+					{
+						"details":"<code>mqsiextractcomponents --backup-file  C:\\MyToolkitWorkspace\\MigrationTutorialHelperFiles\\Backups\\Backup_MY_NODE_V11.zip --source-integration-node MY_NODE_V11 --source-integration-server serverA --target-work-directory C:\\temp\\extracted_serverA</code><br><br>The command response should look like this:<br><br><code>BIP8469I: Version '11.0' backup file supplied.<br>BIP8471I: Loading configuration for source integration node 'MY_NODE_V11'.<br>BIP8470I: Loading configuration for integration server 'serverA'.<br>BIP8472I: Creating target work directory 'C:\\temp\\extracted_serverA'.<br>BIP8071I: Successful command completion.</code>"
+					},
+					{
+						"details":"<code>dir C:\\temp\\extracted_serverA\\run</code><br><br>The command response should look like this:<br><br><code>&nbsp;Volume in drive C is Windows<br>&nbsp;Volume Serial Number is 0483-269F<br><br>&nbsp;Directory of C:\\temp\\extracted_serverA\\run<br><br>24/05/2021&nbsp;&nbsp;22:27&nbsp;&nbsp;&nbsp;&nbsp;<DIR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.<br>24/05/2021&nbsp;&nbsp;22:27&nbsp;&nbsp;&nbsp;&nbsp;<DIR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;..<br>24/05/2021&nbsp;&nbsp;22:27&nbsp;&nbsp;&nbsp;&nbsp;<DIR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DefaultPolicies<br>24/05/2021&nbsp;&nbsp;22:27&nbsp;&nbsp;&nbsp;&nbsp;<DIR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Transformation_ESQL<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 File(s)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 bytes<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4 Dir(s)&nbsp;16,656,842,752 bytes free</code>"				
+					},
+					{
+						"details":"This tutorial has shown how to use the mqsiextractcomponents command to create integration nodes and servers based on existing IBM Integration Bus 10 and IBM App Connect Enterprise 11 topologies."
+					}				
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    }		
+  }
